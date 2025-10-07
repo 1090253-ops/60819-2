@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>貓咪的遊戲：午夜點心大冒險！</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            touch-action: manipulation; /* 禁用雙擊縮放 */
+        }
+        .choice-button {
+            transition: all 0.2s ease-in-out;
+        }
+        .choice-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+        #scene-image {
+            transition: opacity 0.5s ease-in-out;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white flex items-center justify-center min-h-screen p-4">
+
+    <div id="game-container" class="w-full max-w-2xl mx-auto bg-gray-800 rounded-2xl shadow-2xl p-6 sm:p-8">
+        <!-- 遊戲標題 -->
+        <h1 id="game-title" class="text-3xl sm:text-4xl font-bold text-center text-amber-400 mb-4">貓咪的遊戲：午夜點心大冒險！</h1>
+        
+        <!-- 遊戲主畫面 -->
+        <div id="main-menu">
+            <div class="text-center">
+                 <img src="https://placehold.co/600x337/2d3748/e2e8f0?text=麻糬的凝視" alt="一隻貓咪正在凝視著你" class="w-full rounded-lg mb-6 mx-auto">
+                <p class="text-lg text-gray-300 mb-6">你，是一隻名叫「麻糬」的貓。<br>夜深了，一場為了鮪魚的偉大冒險正等著你！</p>
+                <button onclick="startGame()" class="bg-amber-500 hover:bg-amber-600 text-gray-900 font-bold py-3 px-8 rounded-full text-xl shadow-lg focus:outline-none focus:ring-4 focus:ring-amber-300 choice-button">
+                    開始冒險
+                </button>
+            </div>
+        </div>
+
+        <!-- 遊戲進行畫面 -->
+        <div id="game-screen" class="hidden">
+            <!-- 遊戲圖像 -->
+            <div id="scene-image-container" class="mb-6 rounded-lg overflow-hidden bg-gray-700 aspect-video flex items-center justify-center shadow-inner">
+                <img id="scene-image" src="" alt="遊戲場景" class="w-full h-full object-cover">
+            </div>
+            <!-- 故事文字 -->
+            <div id="story-text" class="text-lg text-gray-300 leading-relaxed mb-8 min-h-[100px]"></div>
+            <!-- 選項按鈕 -->
+            <div id="choices" class="grid grid-cols-1 gap-4"></div>
+        </div>
+    </div>
+
+    <script>
+        const story = {
+            start: {
+                text: "你正站在柔軟的沙發旁，打了個哈欠。前方通往廚房的門留了一道縫。從主臥室傳來「大個子」平穩的鼾聲。你的目標——鮪魚，就在廚房裡！",
+                image: "https://placehold.co/600x337/2d3748/e2e8f0?text=客廳沙發旁",
+                choices: [
+                    { text: "A. 直接挑戰那扇門。", nextScene: "challenge_door" },
+                    { text: "B. 尋找替代路線，從貓門溜出去。", nextScene: "backyard" },
+                    { text: "C. 施展「可愛攻擊」，叫醒大個子。", nextScene: "cute_attack" }
+                ]
+            },
+            challenge_door: {
+                text: "你躡手躡腳地走到門邊，用頭輕輕一頂。「嘎吱——」一聲輕響，門被推開了！你成功潛入廚房，鮪魚的香味更濃了。那碗鮪魚就在流理台上，上面蓋著一塊餐巾。",
+                image: "https://placehold.co/600x337/4a5568/e2e8f0?text=潛入廚房",
+                choices: [
+                    { text: "A. 尋找椅子當跳板。", nextScene: "find_chair" },
+                    { text: "B. 直接跳上流理台！", nextScene: "jump_counter" }
+                ]
+            },
+            backyard: {
+                text: "你鑽出貓門，來到涼爽的後院。蟋蟀在鳴唱，但灌木叢裡傳來一陣沙沙聲。一隻看起來不太友善的浣熊從黑暗中現身，擋住了你的去路。",
+                image: "https://placehold.co/600x337/1a202c/e2e8f0?text=後院裡的浣熊",
+                choices: [
+                    { text: "A. 對牠哈氣，捍衛你的地盤！", nextScene: "fight_raccoon" },
+                    { text: "B. 算了，風太大，溜回屋裡。", nextScene: "run_inside" }
+                ]
+            },
+            cute_attack: {
+                text: "你走到臥室門口，發出最可憐的「喵～」。裡面傳來一陣咕噥聲，門開了，一個睡眼惺忪的「大個子」看著你。「麻糬？怎麼了？」",
+                image: "https://placehold.co/600x337/2d3748/e2e8f0?text=睡眼惺忪的大個子",
+                choices: [
+                    { text: "A. 帶他去廚房，示意你的晚餐。", nextScene: "lead_to_kitchen" },
+                    { text: "B. 在他腿上磨蹭，發出呼嚕聲。", nextScene: "get_pets" }
+                ]
+            },
+            find_chair: {
+                text: "真是個聰明的決定！你發現旁邊的餐桌椅是個完美的跳板。你先跳上椅子，再輕鬆一躍就上了流理台。勝利近在眼前！",
+                image: "https://placehold.co/600x337/4a5568/e2e8f0?text=完美的跳板！",
+                choices: [
+                    { text: "撥開餐巾，享用鮪魚！", nextScene: "win" }
+                ]
+            },
+            jump_counter: {
+                text: "你後腿一蹬，使出全力往上一跳！砰！你的前爪扒住了檯面，但後腿卻滑了一下，撞倒了旁邊的空罐子，發出「哐啷！」的巨響。",
+                image: "https://placehold.co/600x337/4a5568/e2e8f0?text=哐啷！",
+                choices: [
+                    { text: "慘了！快躲起來！", nextScene: "human_wakes_up" }
+                ]
+            },
+            fight_raccoon: {
+                text: "你弓起背，毛髮直豎，對著浣熊發出威嚇的嘶吼。浣熊愣了一下，似乎沒想到你這麼有種。牠聳聳肩，轉身消失在黑暗中。通往廚房窗戶的路暢通了！但窗戶有點高...",
+                image: "https://placehold.co/600x337/1a202c/e2e8f0?text=哈氣！",
+                choices: [
+                    { text: "放棄，從貓門回去。", nextScene: "run_inside" },
+                    { text: "試著爬上窗台！", nextScene: "climb_window" }
+                ]
+            },
+            run_inside: {
+                text: "好貓不吃眼前虧。你迅速轉身，溜回溫暖的客廳。冒險可以等，安全第一。你又回到了起點。",
+                image: "https://placehold.co/600x337/2d3748/e2e8f0?text=回到客廳",
+                choices: [
+                    { text: "重新開始。", nextScene: "start" }
+                ]
+            },
+            lead_to_kitchen: {
+                text: "你喵喵叫著，引導「大個子」走進廚房，然後優雅地跳上流理台，用鼻子指了指那碗鮪魚。「喔，你這隻貪吃的小傢伙！」他笑著掀開餐巾，把碗放到地上。",
+                image: "https://placehold.co/600x337/4a5568/e2e8f0?text=大個子與鮪魚",
+                choices: [
+                    { text: "大快朵頤！", nextScene: "win_human" }
+                ]
+            },
+            get_pets: {
+                text: "「大個子」把你抱了起來，溫柔地搔著你的下巴。「只是想撒嬌嗎？」他把你抱回你溫暖的貓窩裡。「晚安啦。」雖然很舒服，但鮪魚的任務...失敗了。",
+                image: "https://placehold.co/600x337/2d3748/e2e8f0?text=被抱回貓窩",
+                choices: [
+                    { text: "再玩一次", nextScene: "start" }
+                ],
+                ending: true
+            },
+            human_wakes_up: {
+                text: "燈亮了！「大個子」出現在廚房門口。「麻糬！你在幹嘛！」你被抓個正著，被他抱回了貓窩。冒險結束了，你的肚子還是空的。",
+                image: "https://placehold.co/600x337/718096/e2e8f0?text=被抓包了！",
+                choices: [
+                    { text: "再玩一次", nextScene: "start" }
+                ],
+                ending: true
+            },
+            climb_window: {
+                text: "你奮力一跳，爪子成功勾住了窗紗！但...窗戶是關著的。你掛在半空中，上不去也下不來。最終，你只能無奈地滑回地面。看來此路不通。",
+                image: "https://placehold.co/600x337/1a202c/e2e8f0?text=掛在窗戶上",
+                choices: [
+                    { text: "從貓門回去吧。", nextScene: "run_inside" }
+                ]
+            },
+            win: {
+                text: "你用爪子輕巧地撥開餐巾，一股濃郁的鮪魚香氣撲鼻而來！你心滿意足地享用了這頓美味的午夜點心。任務成功！你真是最棒的貓咪探險家！",
+                image: "https://placehold.co/600x337/38a169/e2e8f0?text=鮪魚！成功！",
+                choices: [
+                    { text: "再玩一次", nextScene: "start" }
+                ],
+                ending: true
+            },
+            win_human: {
+                text: "太棒了！不用自己動手就能享用大餐。你津津有味地吃著鮪魚，還不忘用感激的眼神看看你的「大個子僕人」。任務圓滿成功！",
+                image: "https://placehold.co/600x337/38a169/e2e8f0?text=任務圓滿成功！",
+                choices: [
+                    { text: "再玩一次", nextScene: "start" }
+                ],
+                ending: true
+            }
+        };
+
+        const mainMenu = document.getElementById('main-menu');
+        const gameScreen = document.getElementById('game-screen');
+        const storyTextElement = document.getElementById('story-text');
+        const choicesElement = document.getElementById('choices');
+        const gameTitle = document.getElementById('game-title');
+        const sceneImage = document.getElementById('scene-image');
+
+        function startGame() {
+            mainMenu.classList.add('hidden');
+            gameScreen.classList.remove('hidden');
+            showScene('start');
+        }
+
+        function showScene(sceneKey) {
+            const scene = story[sceneKey];
+            
+            // 更換圖片並加入淡出淡入效果
+            sceneImage.style.opacity = 0;
+            setTimeout(() => {
+                sceneImage.src = scene.image;
+                sceneImage.alt = scene.text.substring(0, 30); // 用部分文字當作圖片描述
+                sceneImage.style.opacity = 1;
+            }, 300);
+
+            storyTextElement.innerHTML = '';
+            let i = 0;
+            function typeWriter() {
+                if (i < scene.text.length) {
+                    storyTextElement.innerHTML += scene.text.charAt(i);
+                    i++;
+                    setTimeout(typeWriter, 30);
+                }
+            }
+            typeWriter();
+
+            choicesElement.innerHTML = '';
+
+            if (scene.ending) {
+                if (sceneKey.includes('win')) {
+                    gameTitle.textContent = "任務成功！";
+                    gameTitle.classList.remove('text-amber-400');
+                    gameTitle.classList.add('text-green-400');
+                } else {
+                    gameTitle.textContent = "冒險失敗...";
+                    gameTitle.classList.remove('text-amber-400');
+                    gameTitle.classList.add('text-red-400');
+                }
+            } else {
+                gameTitle.textContent = "貓咪的遊戲：午夜點心大冒險！";
+                gameTitle.classList.remove('text-green-400', 'text-red-400');
+                gameTitle.classList.add('text-amber-400');
+            }
+            
+            setTimeout(() => {
+                scene.choices.forEach(choice => {
+                    const button = document.createElement('button');
+                    button.textContent = choice.text;
+                    button.className = 'w-full text-left bg-gray-700 hover:bg-amber-500 hover:text-gray-900 text-white font-semibold py-3 px-5 rounded-lg shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-amber-400 choice-button';
+                    button.onclick = () => showScene(choice.nextScene);
+                    choicesElement.appendChild(button);
+                });
+            }, scene.text.length * 30 + 300);
+        }
+
+    </script>
+</body>
+</html>
+
